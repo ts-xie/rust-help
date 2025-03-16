@@ -1,39 +1,9 @@
-use leptos::{prelude::*};
+use footer::Footer;
+use model::{Todo, FilterView};
+use leptos::prelude::*;
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-struct Todo {
-    id: usize,
-    description: String,
-    done: bool
-}
-
-#[derive(Debug, Default, Clone, PartialEq, Copy)]
-enum FilterView {
-    #[default]
-    All,
-    Active,
-    Completed
-}
-
-impl FilterView {
-    const VALUES: [Self;3] = [Self::All, Self::Active, Self::Completed];
-
-    fn as_string(&self) -> String {
-        match self {
-            Self::All => "All".to_string(),
-            Self::Active => "Active".to_string(),
-            Self::Completed => "Completed".to_string()
-        }
-    }
-
-    fn get_link(&self) -> String {
-      match self {
-          Self::All => "#/".to_string(),
-          Self::Active => "#/active".to_string(),
-          Self::Completed => "#/completed".to_string()
-      }
-  }
-}
+mod footer;
+mod model;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -41,7 +11,7 @@ pub fn App() -> impl IntoView {
     let todo_list: Vec<Todo> = vec![];
     let (new_todo, set_new_todo) = signal(String::new());
     let (todos, set_todos) = signal(todo_list);
-    let (filter_view, set_filter_view) = signal(FilterView::All);
+    let (filters, set_filter) = signal(FilterView::All);
     view! {
         <section class="todoapp">
             <header class="header">
@@ -75,7 +45,7 @@ pub fn App() -> impl IntoView {
                 <ul class="todo-list">
                     <For
                         each=move || {
-                            let what_filter = filter_view.get();
+                            let what_filter = filters.get();
                             todos
                                 .get()
                                 .into_iter()
@@ -88,7 +58,10 @@ pub fn App() -> impl IntoView {
                         key=|todo| todo.id
                         children=move |todo| {
                             view! {
-                                <li>
+                                <li class:completed=move || {
+                                    leptos::logging::log!("done? {}", todo.done);
+                                    todo.done
+                                }>
                                     <div class="view">
                                         <input
                                             class="toggle"
@@ -100,9 +73,10 @@ pub fn App() -> impl IntoView {
                                                     .iter()
                                                     .position(|cur| cur.id == todo.id)
                                                 {
+                                                    leptos::logging::log!("update");
+
                                                     set_todos
                                                         .update(|old_todos| {
-                                                            leptos::logging::log!("done? {}", old_todos[index].done);
                                                             old_todos[index].done = !(old_todos[index].done);
                                                         });
                                                 }
@@ -125,52 +99,25 @@ pub fn App() -> impl IntoView {
                                             }
                                         />
                                     </div>
+                                    <input class="edit" value="Create a TodoMVC template" />
                                 </li>
                             }
                         }
                     />
                 </ul>
             </section>
-            <footer class="footer">
-                <span class="todo-count">
-                    {move || {
-                        let n = todos.get().iter().filter(|todo| !todo.done).count();
-                        format!("{n} {} left!", if n > 1 { "items" } else { "item" })
-                    }}
-                </span>
-                <ul class="filters">
-                    {FilterView::VALUES
-                        .into_iter()
-                        .map(|filter_method| {
-                            view! {
-                                <li on:click=move |_| { set_filter_view.set(filter_method) }>
-                                    <a
-                                        class:selected=move || {
-                                            filter_view.get() == filter_method
-                                        }
-                                        href=filter_method.get_link()
-                                    >
-                                        {filter_method.as_string()}
-                                    </a>
-                                </li>
-                            }
-                        })
-                        .collect_view()}
-                </ul>
-                <button
-                    class="clear-completed"
-                    on:click=move |_| {
-                        let new_todos = todos
-                            .get()
-                            .into_iter()
-                            .filter(|todo| !todo.done)
-                            .collect::<Vec<_>>();
-                        set_todos.set(new_todos);
-                    }
-                >
-                    "Clear completed"
-                </button>
-            </footer>
+            <Footer
+                todos=todos
+                filters=filters
+                on_filter_update=move |filter_method| set_filter.set(filter_method)
+                on_clear_completed=move |_| {
+                let new_todos = todos
+                    .get()
+                    .into_iter()
+                    .filter(|todo| !todo.done)
+                    .collect::<Vec<_>>();
+                set_todos.set(new_todos);
+            }/>
         </section>
     }
 }

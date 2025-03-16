@@ -1,5 +1,4 @@
 use leptos::prelude::*;
-use crate::Todo;
 
 #[component]
 pub fn Header(

@@ -1,5 +1,6 @@
 use footer::Footer;
 use header::Header;
+use todo_list::Main;
 
 use model::{Todo, FilterView};
 use leptos::prelude::*;
@@ -7,6 +8,7 @@ use leptos::prelude::*;
 mod footer;
 mod model;
 mod header;
+mod todo_list;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -36,68 +38,34 @@ pub fn App() -> impl IntoView {
                     }
                 }
             />
-            <section class="main">
-                <input id="toggle-all" class="toggle-all" type="checkbox" />
-                <label for="toggle-all">"Mark all as complete"</label>
-                <ul class="todo-list">
-                    <For
-                        each=move || {
-                            let what_filter = filters.get();
-                            todos
-                                .get()
-                                .into_iter()
-                                .filter(move |todo| match what_filter {
-                                    FilterView::All => true,
-                                    FilterView::Active => !todo.done,
-                                    FilterView::Completed => todo.done,
-                                })
-                        }
-                        key=|todo| todo.id
-                        children=move |todo| {
-                            view! {
-                                <li class:completed=move || todo.done>
-                                    <div class="view">
-                                        <input
-                                            class="toggle"
-                                            type="checkbox"
-                                            prop:checked=todo.done
-                                            on:change=move |_| {
-                                                if let Some(index) = todos
-                                                    .get()
-                                                    .iter()
-                                                    .position(|cur| cur.id == todo.id)
-                                                {
-                                                    set_todos
-                                                        .update(|old_todos| {
-                                                            old_todos[index].done = !(old_todos[index].done);
-                                                        });
-                                                }
-                                            }
-                                        />
-                                        <label>{todo.description}</label>
-                                        <button
-                                            class="destroy"
-                                            on:click=move |_| {
-                                                if let Some(index) = todos
-                                                    .get()
-                                                    .iter()
-                                                    .position(|cur| cur.id == todo.id)
-                                                {
-                                                    set_todos
-                                                        .update(|old_todos| {
-                                                            old_todos.remove(index);
-                                                        });
-                                                }
-                                            }
-                                        />
-                                    </div>
-                                    <input class="edit" value="Create a TodoMVC template" />
-                                </li>
-                            }
-                        }
-                    />
-                </ul>
-            </section>
+            <Main
+                todos=todos
+                filters=filters
+                on_check=move |todo| {
+                    if let Some(index) = todos
+                        .get()
+                        .iter()
+                        .position(|cur| cur.id == todo.id)
+                    {
+                        set_todos
+                            .update(|old_todos| {
+                                old_todos[index].done = !(old_todos[index].done);
+                            });
+                    }
+                }
+                on_destroy=move |todo| {
+                    if let Some(index) = todos
+                        .get()
+                        .iter()
+                        .position(|cur| cur.id == todo.id)
+                    {
+                        set_todos
+                            .update(|old_todos| {
+                                old_todos.remove(index);
+                            });
+                    }
+                }
+                />
             <Footer
                 todos=todos
                 filters=filters

@@ -1,3 +1,4 @@
+use std::sync::{Arc, Mutex};
 use leptos::{ev::MouseEvent, prelude::*};
 
 use crate::{Todo, FilterView};
@@ -6,9 +7,11 @@ use crate::{Todo, FilterView};
 pub fn Footer(
     todos: ReadSignal<Vec<Todo>>,
     filters: ReadSignal<FilterView>,
-    mut on_filter_update: impl FnMut(FilterView) + 'static,
+    on_filter_update: impl FnMut(FilterView) + 'static,
     on_clear_completed: impl FnMut(MouseEvent) + 'static
 ) -> impl IntoView {
+    let on_filter_update = Arc::new(Mutex::new(on_filter_update));
+
     view! {
         <footer class="footer">
                 <span class="todo-count">
@@ -21,8 +24,9 @@ pub fn Footer(
                     {FilterView::VALUES
                         .into_iter()
                         .map(|filter_method| {
+                            let on_filter_update = Arc::clone(&on_filter_update);
                             view! {
-                                <li on:click=move |_|on_filter_update(filter_method.clone())>
+                                <li on:click=move |_| (on_filter_update.lock().unwrap())(filter_method) >
                                     <a
                                         class:selected=move || {
                                             filters.get() == filter_method

@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 use leptos::{ev::MouseEvent, prelude::*};
 
-use crate::{Todo, FilterView};
+use crate::model::{Todo, FilterView};
 
 #[component]
 pub fn Footer(

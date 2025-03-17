@@ -1,8 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use leptos::prelude::*;
-use crate::FilterView;
-use crate::Todo;
+use crate::model::{FilterView, Todo};
 
 #[component]
 pub fn Main(

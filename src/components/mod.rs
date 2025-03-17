@@ -21,8 +21,8 @@ pub fn App() -> impl IntoView {
                 new_todo=new_todo
                 on_input=move |value| set_new_todo.set(value)
                 on_key_up=move |key| {
-                    counter += 1;
                     if key == "Enter" {
+                        counter += 1;
                         set_todos
                             .update(|todos| {
                                 todos
@@ -43,7 +43,7 @@ pub fn App() -> impl IntoView {
                     if let Some(index) = todos.get().iter().position(|cur| cur.id == id) {
                         set_todos
                             .update(|old_todos| {
-                                old_todos[index].done = !(old_todos[index].done);
+                                old_todos[index].toggle_completed();
                             });
                     }
                 }

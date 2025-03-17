@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use leptos::prelude::*;
+
 use crate::model::{FilterView, Todo};
 
 #[component]
@@ -20,22 +21,26 @@ pub fn Main(
             <ul class="todo-list">
                 <For
                     each=move || {
-                        let what_filter = filters.get();
+                        let filter = filters.get();
                         todos
                             .get()
                             .into_iter()
-                            .filter(move |todo| match what_filter {
+                            .filter(move |todo| match filter {
                                 FilterView::All => true,
                                 FilterView::Active => !todo.done,
                                 FilterView::Completed => todo.done,
                             })
+                            .map(|todo| (todo.id, todo))
                     }
-                    key=|todo| todo.id
-                    children=move |todo| {
+                    key=|(_, todo)| todo.id
+                    children=move |(id, todo)| {
                         let on_check = on_check.clone();
                         let on_destroy = on_destroy.clone();
+                        let value = Memo::new(move |_| {
+                            todos.with(|item| item.iter().find(|item| item.id == id).map(|d| d.done).unwrap_or(false))
+                        });
                         view! {
-                            <li>
+                            <li class:completed=value>
                                 <div class="view">
                                     <input
                                         class="toggle"

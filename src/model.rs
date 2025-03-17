@@ -5,6 +5,12 @@ pub struct Todo {
     pub done: bool
 }
 
+impl Todo {
+    pub fn toggle_completed(&mut self) {
+        self.done = !self.done;
+    }
+}
+
 #[derive(Debug, Default, Clone, PartialEq, Copy)]
 pub enum FilterView {
     #[default]

@@ -39,7 +39,7 @@ pub fn Main(
                     children=move |(id, todo)| {
                         let on_check = on_check.clone();
                         let on_destroy = on_destroy.clone();
-                        let value = Memo::new(move |_| {
+                        let is_completed = Memo::new(move |_| {
                             todos
                                 .with(|item| {
                                     item
@@ -50,12 +50,12 @@ pub fn Main(
                                 })
                         });
                         view! {
-                            <li class:completed=value>
+                            <li class:completed=is_completed>
                                 <div class="view">
                                     <input
                                         class="toggle"
                                         type="checkbox"
-                                        prop:checked=todo.done
+                                        prop:checked=is_completed
                                         on:change=move |_| (on_check.lock().unwrap())(todo.id)
                                     />
                                     <label>{todo.description}</label>

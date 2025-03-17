@@ -47,6 +47,30 @@ pub fn App() -> impl IntoView {
                             });
                     }
                 }
+                on_toggle_all=move |_| {
+                    match todos.get().iter().all(|item| item.done) {
+                        true => {
+                            set_todos
+                                .update(|todos| {
+                                    todos
+                                        .iter_mut()
+                                        .for_each(|todo| {
+                                            todo.done = false;
+                                        })
+                                })
+                        }
+                        false => {
+                            set_todos
+                                .update(|todos| {
+                                    todos
+                                        .iter_mut()
+                                        .for_each(|todo| {
+                                            todo.done = true;
+                                        })
+                                })
+                        }
+                    }
+                }
                 on_destroy=move |id| {
                     if let Some(index) = todos.get().iter().position(|cur| cur.id == id) {
                         set_todos

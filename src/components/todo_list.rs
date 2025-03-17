@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use leptos::prelude::*;
+use leptos::{ev::MouseEvent, prelude::*};
 
 use crate::model::{FilterView, Todo};
 
@@ -10,6 +10,7 @@ pub fn Main(
     filters: ReadSignal<FilterView>,
     on_check: impl FnMut(usize) + 'static + Send,
     on_destroy: impl FnMut(usize) + 'static + Send,
+    on_toggle_all: impl FnMut(MouseEvent) + 'static
 ) -> impl IntoView {
     let on_check = Arc::new(Mutex::new(on_check));
     let on_destroy = Arc::new(Mutex::new(on_destroy));
@@ -17,7 +18,9 @@ pub fn Main(
     view! {
         <section class="main">
             <input id="toggle-all" class="toggle-all" type="checkbox" />
-            <label for="toggle-all">"Mark all as complete"</label>
+            <label for="toggle-all" on:click=on_toggle_all>
+                "Mark all as complete"
+            </label>
             <ul class="todo-list">
                 <For
                     each=move || {
@@ -37,7 +40,14 @@ pub fn Main(
                         let on_check = on_check.clone();
                         let on_destroy = on_destroy.clone();
                         let value = Memo::new(move |_| {
-                            todos.with(|item| item.iter().find(|item| item.id == id).map(|d| d.done).unwrap_or(false))
+                            todos
+                                .with(|item| {
+                                    item
+                                        .iter()
+                                        .find(|item| item.id == id)
+                                        .map(|d| d.done)
+                                        .unwrap_or(false)
+                                })
                         });
                         view! {
                             <li class:completed=value>

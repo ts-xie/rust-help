@@ -41,31 +41,23 @@ pub fn App() -> impl IntoView {
             <Main
                 todos=todos
                 filters=filters
-                on_check=move |todo| {
-                    if let Some(index) = todos
-                        .get()
-                        .iter()
-                        .position(|cur| cur.id == todo.id)
-                    {
+                on_check=move |id| {
+                    if let Some(index) = todos.get().iter().position(|cur| cur.id == id) {
                         set_todos
                             .update(|old_todos| {
                                 old_todos[index].done = !(old_todos[index].done);
                             });
                     }
                 }
-                on_destroy=move |todo| {
-                    if let Some(index) = todos
-                        .get()
-                        .iter()
-                        .position(|cur| cur.id == todo.id)
-                    {
+                on_destroy=move |id| {
+                    if let Some(index) = todos.get().iter().position(|cur| cur.id == id) {
                         set_todos
                             .update(|old_todos| {
                                 old_todos.remove(index);
                             });
                     }
                 }
-                />
+            />
             <Footer
                 todos=todos
                 filters=filters

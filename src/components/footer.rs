@@ -38,9 +38,9 @@ pub fn Footer(
                     })
                     .collect_view()}
             </ul>
-            <Show
-                when=move || { todos.get().iter().any(|todo| todo.done) }
-            >
+            <Show when=move || {
+                todos.get().iter().any(|todo| todo.done)
+            }>
                 {
                     let on_clear_completed = on_clear_completed.clone();
                     view! {

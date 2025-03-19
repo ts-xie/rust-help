@@ -39,37 +39,32 @@ pub fn App() -> impl IntoView {
             <Main
                 todos=todos
                 filters=filters
+                on_update=move |(id, text)| {
+                    set_todos
+                        .update(|old_todos| {
+                            if let Some(todo) = old_todos.iter_mut().find(|todo| todo.id == id) {
+                                todo.description = text;
+                            }
+                        });
+                }
                 on_check=move |id| {
-                    if let Some(index) = todos.get().iter().position(|cur| cur.id == id) {
-                        set_todos
-                            .update(|old_todos| {
-                                old_todos[index].toggle_completed();
-                            });
-                    }
+                    set_todos
+                        .update(|old_todos| {
+                            if let Some(todo) = old_todos.iter_mut().find(|todo| todo.id == id) {
+                                todo.toggle_completed();
+                            }
+                        });
                 }
                 on_toggle_all=move |_| {
-                    match todos.get().iter().all(|item| item.done) {
-                        true => {
-                            set_todos
-                                .update(|todos| {
-                                    todos
-                                        .iter_mut()
-                                        .for_each(|todo| {
-                                            todo.done = false;
-                                        })
+                    let all_done = todos.get().iter().all(|item| item.done);
+                    set_todos
+                        .update(|todos| {
+                            todos
+                                .iter_mut()
+                                .for_each(|todo| {
+                                    todo.done = !all_done;
                                 })
-                        }
-                        false => {
-                            set_todos
-                                .update(|todos| {
-                                    todos
-                                        .iter_mut()
-                                        .for_each(|todo| {
-                                            todo.done = true;
-                                        })
-                                })
-                        }
-                    }
+                        })
                 }
                 on_destroy=move |id| {
                     if let Some(index) = todos.get().iter().position(|cur| cur.id == id) {

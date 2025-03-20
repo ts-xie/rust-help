@@ -40,7 +40,6 @@ pub fn Main(
                     children=move |(id, todo)| {
                         let on_check = on_check.clone();
                         let on_destroy = on_destroy.clone();
-                        let on_update = on_update.clone();
                         let is_completed = Memo::new(move |_| {
                             todos
                                 .with(|item| {
@@ -83,23 +82,35 @@ pub fn Main(
                                         on:click=move |_| (on_destroy.lock().unwrap())(todo.id)
                                     />
                                 </div>
-                                <input
-                                    class="edit"
-                                    value=todo.description.clone()
-                                    node_ref=edit_ref
-                                    autofocus
-                                    on:keyup=move |ev| {
-                                        if ev.key() == "Enter" {
-                                            (on_update
-                                                .lock()
-                                                .unwrap())((id, edit_ref.get().unwrap().value()));
-                                            set_editing.set(false);
-                                        }
+                                {
+                                    let on_key_down_update = on_update.clone();
+                                    let on_blur_update = on_update.clone();
+                                    view! {
+                                        <input
+                                            class="edit"
+                                            value=todo.description
+                                            node_ref=edit_ref
+                                            on:keydown=move |ev| {
+                                                if ev.key() == "Enter" {
+                                                    (on_key_down_update
+                                                        .lock()
+                                                        .unwrap())((id, edit_ref.get().unwrap().value()));
+                                                    set_editing.set(false);
+                                                }
+                                                if ev.key() == "Escape" {
+                                                    edit_ref.get().unwrap().set_value(&desc.get());
+                                                    set_editing.set(false);
+                                                }
+                                            }
+                                            on:blur=move |_| {
+                                                (on_blur_update
+                                                    .lock()
+                                                    .unwrap())((id, edit_ref.get().unwrap().value()));
+                                                set_editing.set(false);
+                                            }
+                                        />
                                     }
-                                    on:blur=move |_| {
-                                        set_editing.set(false);
-                                    }
-                                />
+                                }
                             </li>
                         }
                     }

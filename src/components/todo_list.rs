@@ -11,17 +11,30 @@ pub fn Main(
     on_update: impl FnMut((usize, String)) + 'static + Send + Sync,
     on_check: impl FnMut(usize) + 'static + Send,
     on_destroy: impl FnMut(usize) + 'static + Send,
-    on_toggle_all: impl FnMut(MouseEvent) + 'static
+    on_toggle_all: impl FnMut(MouseEvent) + 'static + Send + Sync
 ) -> impl IntoView {
     let on_update = Arc::new(Mutex::new(on_update));
     let on_check = Arc::new(Mutex::new(on_check));
     let on_destroy = Arc::new(Mutex::new(on_destroy));
+    let on_toggle_all = Arc::new(Mutex::new(on_toggle_all));
+
     view! {
         <section class="main">
-            <input id="toggle-all" class="toggle-all" type="checkbox" />
-            <label for="toggle-all" on:click=on_toggle_all>
-                "Mark all as complete"
-            </label>
+            <Show when=move|| { todos.get().len() > 0 }>
+                {
+                    let on_toggle_all = on_toggle_all.clone();
+                    view! {
+                        <div class="toggle-all-container">
+                            <input id="toggle-all" class="toggle-all" type="checkbox" />
+                            <label for="toggle-all"
+                                class="toggle-all-label"
+                                on:click=move |ev| (on_toggle_all.lock().unwrap())(ev)>
+                                "Mark all as complete"
+                            </label>
+                        </div>
+                    }
+                }
+            </Show>
             <ul class="todo-list">
                 <For
                     each=move || {

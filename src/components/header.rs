@@ -11,6 +11,7 @@ pub fn Header(
             <h1>"todos"</h1>
             <input
                 class="new-todo"
+                placeholder="What needs to be done?"
                 on:input:target=move |ev| on_input(ev.target().value())
                 on:keyup=move |ev| { on_key_up(ev.key()) }
                 prop:value=new_todo

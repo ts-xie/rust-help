@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use leptos::{ev::MouseEvent, html, prelude::*};
+use leptos::{html, prelude::*};
 
 use crate::model::{FilterView, Todo};
 
@@ -11,7 +11,7 @@ pub fn Main(
     on_update: impl FnMut((usize, String)) + 'static + Send + Sync,
     on_check: impl FnMut(usize) + 'static + Send,
     on_destroy: impl FnMut(usize) + 'static + Send,
-    on_toggle_all: impl FnMut(MouseEvent) + 'static + Send + Sync
+    on_toggle_all: impl FnMut() + 'static + Send + Sync
 ) -> impl IntoView {
     let on_update = Arc::new(Mutex::new(on_update));
     let on_check = Arc::new(Mutex::new(on_check));
@@ -25,10 +25,14 @@ pub fn Main(
                     let on_toggle_all = on_toggle_all.clone();
                     view! {
                         <div class="toggle-all-container">
-                            <input id="toggle-all" class="toggle-all" type="checkbox" />
-                            <label for="toggle-all"
-                                class="toggle-all-label"
-                                on:click=move |ev| (on_toggle_all.lock().unwrap())(ev)>
+                            <input
+                                id="toggle-all"
+                                class="toggle-all"
+                                type="checkbox"
+                                on:change=move |_| (on_toggle_all.lock().unwrap())()
+                                prop:checked=move|| todos.get().iter().all(|todo| todo.done)
+                            />
+                            <label for="toggle-all" class="toggle-all-label">
                                 "Mark all as complete"
                             </label>
                         </div>

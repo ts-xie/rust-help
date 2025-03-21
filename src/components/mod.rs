@@ -55,7 +55,7 @@ pub fn App() -> impl IntoView {
                             }
                         });
                 }
-                on_toggle_all=move |_| {
+                on_toggle_all=move || {
                     let all_done = todos.get().iter().all(|item| item.done);
                     set_todos
                         .update(|todos| {
